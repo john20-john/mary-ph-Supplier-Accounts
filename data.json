@@ -1,3 +1,13 @@
 {
-  "transactions": []
+  "transactions": [
+    {
+      "id": "1779644195674",
+      "supplier": "نالي فارم",
+      "type": "payment",
+      "amount": 15000,
+      "date": "2026-05-24",
+      "timestamp": "2026-05-24T17:36:35.674Z",
+      "notes": ""
+    }
+  ]
 }
