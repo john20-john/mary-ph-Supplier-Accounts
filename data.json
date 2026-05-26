@@ -1,1 +1,13 @@
-
+{
+  "transactions": [
+    {
+      "id": "1779819148444",
+      "supplier": "نالي فارم",
+      "type": "invoice",
+      "amount": 40829.3,
+      "date": "2026-05-26",
+      "timestamp": "2026-05-26T18:12:28.444Z",
+      "invoiceNum": "10252183"
+    }
+  ]
+}
