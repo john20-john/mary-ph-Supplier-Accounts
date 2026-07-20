@@ -306,6 +306,8 @@
 <script>
 // مصفوفة عامة لحفظ الأصناف
 let parsedItems = [];
+// مصفوفة لحفظ الكميات المدخلة (تحتفظ بالقيم حتى عند الحذف)
+let itemQuantities = [];
 
 function prepareQuantityList() {
     const text = document.getElementById('input-list').value.trim();
@@ -316,6 +318,9 @@ function prepareQuantityList() {
 
     // تنظيف وتقسيم النص
     parsedItems = text.split('\n').map(l => l.trim()).filter(l => l !== '');
+    
+    // إعادة تهيئة مصفوفة الكميات بنفس عدد الأصناف
+    itemQuantities = new Array(parsedItems.length).fill('');
     
     const listContainer = document.getElementById('q-list-container');
     listContainer.innerHTML = ''; // تفريغ القائمة القديمة إن وجدت
@@ -354,6 +359,8 @@ function renderItemRow(container, itemText, index) {
     qtyInput.placeholder = 'الكمية';
     qtyInput.id = `qty-${index}`;
     qtyInput.min = "0";
+    // استرجاع الكمية المدخلة سابقاً إن وجدت
+    qtyInput.value = itemQuantities[index] || '';
 
     // اسم الصنف
     const nameSpan = document.createElement('span');
@@ -395,11 +402,15 @@ function renderItemRow(container, itemText, index) {
 
     qtyInput.addEventListener('blur', () => {
         row.classList.remove('active-row');
+        // حفظ الكمية المدخلة
+        itemQuantities[index] = qtyInput.value;
     });
 
     qtyInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
+            // حفظ الكمية قبل الانتقال
+            itemQuantities[index] = qtyInput.value;
             const nextInput = document.getElementById(`qty-${index + 1}`);
             if (nextInput) {
                 nextInput.focus();
@@ -486,12 +497,12 @@ function saveEditedItem(index, newText) {
 
     parsedItems[index] = newText;
 
-    // إعادة بناء السطر
+    // إعادة رسم السطر فقط دون تغيير الكميات
     const row = document.getElementById(`row-${index}`);
     const container = row.parentNode;
     row.remove();
 
-    // إنشاء سطر جديد
+    // إنشاء سطر جديد (الكمية محفوظة في itemQuantities)
     const rows = container.querySelectorAll('.item-row');
     if (index < rows.length) {
         container.insertBefore(createNewRow(newText, index), rows[index]);
@@ -515,6 +526,8 @@ function createNewRow(itemText, index) {
     qtyInput.placeholder = 'الكمية';
     qtyInput.id = `qty-${index}`;
     qtyInput.min = "0";
+    // استرجاع الكمية المحفوظة
+    qtyInput.value = itemQuantities[index] || '';
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'item-name';
@@ -551,11 +564,15 @@ function createNewRow(itemText, index) {
 
     qtyInput.addEventListener('blur', () => {
         row.classList.remove('active-row');
+        // حفظ الكمية المدخلة
+        itemQuantities[index] = qtyInput.value;
     });
 
     qtyInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
+            // حفظ الكمية قبل الانتقال
+            itemQuantities[index] = qtyInput.value;
             const nextInput = document.getElementById(`qty-${index + 1}`);
             if (nextInput) {
                 nextInput.focus();
@@ -614,9 +631,17 @@ function cancelEditingItem(index, originalText) {
 
 function deleteItem(index) {
     if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
+        // حفظ الكمية الحالية قبل الحذف
+        const qtyInput = document.getElementById(`qty-${index}`);
+        if (qtyInput) {
+            itemQuantities[index] = qtyInput.value;
+        }
+        
+        // حذف الصنف والكمية المرتبطة به
         parsedItems.splice(index, 1);
+        itemQuantities.splice(index, 1);
 
-        // إعادة بناء القائمة بأكملها
+        // إعادة بناء القائمة بأكملها مع الحفاظ على الكميات
         const listContainer = document.getElementById('q-list-container');
         listContainer.innerHTML = '';
 
@@ -637,10 +662,15 @@ function generateImages() {
     // جمع البيانات (الاسم + الكمية المدخلة)
     const finalData = [];
     for (let i = 0; i < parsedItems.length; i++) {
-        const qtyValue = document.getElementById(`qty-${i}`).value;
+        // حفظ الكمية الحالية أولاً
+        const qtyInput = document.getElementById(`qty-${i}`);
+        if (qtyInput) {
+            itemQuantities[i] = qtyInput.value;
+        }
+        
         finalData.push({
             name: parsedItems[i],
-            quantity: qtyValue.trim()
+            quantity: itemQuantities[i].trim()
         });
     }
 
